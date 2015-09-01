@@ -24,12 +24,18 @@ import logging
 from datetime import datetime, timedelta
 
 from dateutil.relativedelta import relativedelta
+from elasticsearch import Elasticsearch
+from elasticsearch.helpers import bulk, BulkIndexError
+from elasticsearch.exceptions import TransportError
 
 from openerp.osv import orm, fields
 from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT
+from openerp.tools.translate import _
 
 
 _logger = logging.getLogger(__name__)
+
+BULK_CHUNK_SIZE = 1000  # records at a time
 
 
 class ElasticSearchViewIndex(orm.Model):
@@ -45,7 +51,7 @@ class ElasticSearchViewIndex(orm.Model):
         return [(row[0], row[0]) for row in cr.fetchall()]
 
     _columns = {
-        'name': fields.char(string='Index name', required=True),
+        'name': fields.char(string='Index Name', required=True),
         'host_id': fields.many2one('elasticsearch.host',
                                    string='Hosts',
                                    required=True),
@@ -116,5 +122,53 @@ class ElasticSearchViewIndex(orm.Model):
                 view_index.write({'refresh_next': new_date})
         return True
 
+    def _es_index_data(self, cr, uid, view_index, context=None):
+        cr.execute("SELECT * FROM %s" % view_index.sql_view)
+        for row in cr.dictfetchall():
+            yield {'_index': view_index.name,
+                   '_type': 'document',
+                   '_source': row}
+
+    def _es_client(self, cr, uid, view_index, context=None):
+        return Elasticsearch([view_index.host_id.host])
+
     def _es_create_index(self, cr, uid, view_index, context=None):
-        _logger.debug('Create index %s on ElasticSearch', view_index.name)
+        es = self._es_client(cr, uid, view_index, context=context)
+        _logger.info("Creating index '%s' on %s", view_index.name, es)
+        if es.indices.exists(index=view_index.name):
+            es.indices.delete(index=view_index.name)
+
+        # TODO: param
+        request_body = {
+            'settings': {
+                'number_of_shards': 1,
+                'number_of_replicas': 0,
+            }
+        }
+        try:
+            es.indices.create(index=view_index.name,
+                              body=request_body)
+        except TransportError as err:
+            raise orm.except_orm(
+                _('Error'),
+                _('Could not create the '
+                  'index on ElasticSearch:\n\n%s' % (err,))
+            )
+        index_data = self._es_index_data(cr, uid, view_index, context=context)
+        try:
+            result = bulk(es, index_data, chunk_size=BULK_CHUNK_SIZE)
+        except TransportError as err:
+            raise orm.except_orm(
+                _('Error'),
+                _('Could not send data on the '
+                  'index on ElasticSearch:\n\n%s' % (err,))
+            )
+        except BulkIndexError as err:
+            raise orm.except_orm(
+                _('Error'),
+                _('Could not index the view %s '
+                  'on ElasticSearch:\n\n%s' % (view_index.name, err,))
+            )
+        return result
+
+        # TODO: unlink, renaming of index
