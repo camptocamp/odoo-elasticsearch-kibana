@@ -1,0 +1,4 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_elasticsearch_host_admin,elasticsearch_host admin,model_elasticsearch_host,base.group_system,1,1,1,1
+access_elasticsearch_view_index_admin,elasticsearch_view_index admin,model_elasticsearch_view_index,base.group_system,1,1,1,1
+

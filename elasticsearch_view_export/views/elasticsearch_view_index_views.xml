@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+  <data noupdate="0">
+
+    <record id="view_elasticsearch_view_index_form" model="ir.ui.view">
+      <field name="name">elasticsearch.view.index.form</field>
+      <field name="model">elasticsearch.view.index</field>
+      <field name="arch" type="xml">
+        <form string="ElasticSearch View Index" version="7.0">
+          <sheet string="ElasticSearch View Index">
+            <group>
+              <field name="name"/>
+              <field name="host_id"/>
+            </group>
+          </sheet>
+        </form>
+      </field>
+    </record>
+
+    <record id="view_elasticsearch_view_index_tree" model="ir.ui.view">
+      <field name="name">elasticsearch.view.index.tree</field>
+      <field name="model">elasticsearch.view.index</field>
+      <field name="arch" type="xml">
+        <tree string="ElasticSearch View Indexes">
+          <field name="name"/>
+        </tree>
+      </field>
+    </record>
+
+    <record id="view_elasticsearch_view_index_search" model="ir.ui.view">
+      <field name="name">elasticsearch.view.index.filter</field>
+      <field name="model">elasticsearch.view.index</field>
+      <field name="arch" type="xml">
+        <search string="ElasticSearch View Indexes">
+          <field name="name"/>
+        </search>
+      </field>
+    </record>
+
+    <record id="action_elasticsearch_view_index" model="ir.actions.act_window">
+      <field name="name">ElasticSearch View Indexes</field>
+      <field name="type">ir.actions.act_window</field>
+      <field name="res_model">elasticsearch.view.index</field>
+      <field name="view_type">form</field>
+      <field name="view_mode">tree,form</field>
+      <field name="search_view_id" ref="view_elasticsearch_view_index_search"/>
+    </record>
+
+    <menuitem id="menu_elasticsearch_view_index"
+      action="action_elasticsearch_view_index"
+      sequence="20"
+      parent="base.next_id_9"
+      string="ElasticSearch View Indexes"/>
+
+  </data>
+</openerp>
