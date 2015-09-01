@@ -26,9 +26,20 @@ class ElasticSearchViewIndex(orm.Model):
     _name = 'elasticsearch.view.index'
     _description = 'ElasticSearch View Index'
 
+    def _selection_sql_view(self, cr, uid, context=None):
+        cr.execute(
+            "SELECT viewname FROM pg_catalog.pg_views "
+            "WHERE schemaname NOT IN ('pg_catalog', 'information_schema') "
+            "ORDER BY schemaname, viewname"
+        )
+        return [(row[0], row[0]) for row in cr.fetchall()]
+
     _columns = {
         'name': fields.char(string='Index name', required=True),
         'host_id': fields.many2one('elasticsearch.host',
                                    string='Hosts',
                                    required=True),
+        'sql_view': fields.selection(_selection_sql_view,
+                                     string='View',
+                                     required=True),
     }

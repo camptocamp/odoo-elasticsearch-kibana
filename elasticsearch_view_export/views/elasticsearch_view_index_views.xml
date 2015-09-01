@@ -11,6 +11,7 @@
             <group>
               <field name="name"/>
               <field name="host_id"/>
+              <field name="sql_view"/>
             </group>
           </sheet>
         </form>
