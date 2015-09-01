@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+  <data>
+
+    <record model="ir.cron" id="cron_elasticsearch_view_index">
+      <field name="name">Create ElasticSearch Indexes based on SQL views</field>
+      <field name="interval_number">1</field>
+      <field name="interval_type">hours</field>
+      <field name="numbercall">-1</field>
+      <field name="model" eval="'elasticsearch.view.index'"/>
+      <field name="function" eval="'_cron_refresh_index'"/>
+      <field name="args" eval="'()'"/>
+    </record>
+  </data>
+</openerp>

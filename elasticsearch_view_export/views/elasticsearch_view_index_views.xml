@@ -7,11 +7,25 @@
       <field name="model">elasticsearch.view.index</field>
       <field name="arch" type="xml">
         <form string="ElasticSearch View Index" version="7.0">
+          <header>
+            <button name="refresh_index"
+              type="object"
+              string="Create Index"
+              class="oe_highlight"/>
+          </header>
           <sheet string="ElasticSearch View Index">
             <group>
               <field name="name"/>
               <field name="host_id"/>
               <field name="sql_view"/>
+            </group>
+            <group>
+              <label for="refresh_interval"/>
+              <div>
+                  <field name="refresh_interval" class="oe_inline" />
+                  <field name="refresh_interval_type" class="oe_inline" />
+              </div>
+              <field name="refresh_next"/>
             </group>
           </sheet>
         </form>
