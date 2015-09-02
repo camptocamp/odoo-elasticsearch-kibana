@@ -11,13 +11,27 @@
             <button name="refresh_index"
               type="object"
               string="Create Index"
+              states="draft"
               class="oe_highlight"/>
+            <button name="refresh_index"
+              type="object"
+              states="done"
+              string="Refresh Index"
+              class="oe_highlight"/>
+            <button name="drop_index"
+              type="object"
+              states="done"
+              string="Drop Index"/>
+            <field name="state"
+              widget="statusbar"
+              nolabel="1"
+              statusbar_visible="draft,done"/>
           </header>
           <sheet string="ElasticSearch View Index">
             <group>
-              <field name="name"/>
-              <field name="sql_view"/>
-              <field name="host_id"/>
+              <field name="name" attrs="{'readonly': [('state', '!=', 'draft')]}"/>
+              <field name="sql_view" attrs="{'readonly': [('state', '!=', 'draft')]}"/>
+              <field name="host_id" attrs="{'readonly': [('state', '!=', 'draft')]}"/>
             </group>
             <group string="Refresh">
               <field name="refresh_auto"/>

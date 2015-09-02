@@ -78,6 +78,13 @@ class ElasticSearchViewIndex(orm.Model):
                                         required=True),
         'number_of_shards': fields.integer(string='Number of shards'),
         'number_of_replicas': fields.integer(string='Number of replicas'),
+        'state': fields.selection(
+            [('draft', 'Draft'),
+             ('done', 'Indexed'),
+             ],
+            string='State',
+            readonly=True,
+        ),
     }
 
     def _default_refresh_next(self, cr, uid, context=None):
@@ -96,10 +103,18 @@ class ElasticSearchViewIndex(orm.Model):
         'refresh_interval_type': 'daily',
         'number_of_shards': 1,
         'number_of_replicas': 0,
+        'state': 'draft',
     }
 
     def refresh_index(self, cr, uid, ids, context=None):
         return self._refresh_index(cr, uid, ids, context=context)
+
+    def drop_index(self, cr, uid, ids, context=None):
+        for view_index in self.browse(cr, uid, ids, context=context):
+            es = self._es_client(cr, uid, view_index, context=context)
+            _logger.info("Dropping index '%s' on %s", view_index.name, es)
+            self._es_drop_index(cr, uid, view_index, es, context=context)
+            view_index.write({'state': 'draft'})
 
     def _cron_refresh_index(self, cr, uid, context=None):
         return self._refresh_index(cr, uid, [], automatic=True,
@@ -112,6 +127,7 @@ class ElasticSearchViewIndex(orm.Model):
             ids = self.search(cr, uid, domain, context=context)
         for view_index in self.browse(cr, uid, ids, context=context):
             self._es_create_index(cr, uid, view_index, context=context)
+            values = {'state': 'done'}
             if automatic:
                 next_date = datetime.strptime(view_index.refresh_next,
                                               DEFAULT_SERVER_DATETIME_FORMAT)
@@ -126,7 +142,8 @@ class ElasticSearchViewIndex(orm.Model):
                     new_date = next_date + relativedelta(months=+interval)
                 else:
                     new_date = next_date + relativedelta(years=+interval)
-                view_index.write({'refresh_next': new_date})
+                values['refresh_next'] = new_date
+            view_index.write(values)
         return True
 
     def _es_index_data(self, cr, uid, view_index, context=None):
@@ -139,11 +156,14 @@ class ElasticSearchViewIndex(orm.Model):
     def _es_client(self, cr, uid, view_index, context=None):
         return Elasticsearch([view_index.host_id.host])
 
-    def _es_create_index(self, cr, uid, view_index, context=None):
-        es = self._es_client(cr, uid, view_index, context=context)
-        _logger.info("Creating index '%s' on %s", view_index.name, es)
+    def _es_drop_index(self, cr, uid, view_index, es, context=None):
         if es.indices.exists(index=view_index.name):
             es.indices.delete(index=view_index.name)
+
+    def _es_create_index(self, cr, uid, view_index, context=None):
+        es = self._es_client(cr, uid, view_index, context=context)
+        self._es_drop_index(cr, uid, view_index, es, context=context)
+        _logger.info("Creating index '%s' on %s", view_index.name, es)
 
         request_body = {
             'settings': {
@@ -176,5 +196,3 @@ class ElasticSearchViewIndex(orm.Model):
                   'on ElasticSearch:\n\n%s' % (view_index.name, err,))
             )
         return result
-
-        # TODO: unlink, renaming of index
