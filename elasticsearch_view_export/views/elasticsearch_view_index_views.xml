@@ -115,9 +115,9 @@
 
     <menuitem id="menu_elasticsearch_view_index"
       action="action_elasticsearch_view_index"
-      sequence="20"
-      parent="base.next_id_9"
-      string="Elasticsearch View Indexes"/>
+      sequence="21"
+      parent="menu_elasticsearch"
+      name="View Indexes"/>
 
   </data>
 </openerp>

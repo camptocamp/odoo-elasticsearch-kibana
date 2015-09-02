@@ -48,8 +48,8 @@
     <menuitem id="menu_elasticsearch_host"
       action="action_elasticsearch_host"
       sequence="20"
-      parent="base.next_id_9"
-      string="Elasticsearch Hosts"/>
+      parent="menu_elasticsearch"
+      name="Hosts"/>
 
   </data>
 </openerp>

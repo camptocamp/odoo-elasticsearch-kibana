@@ -32,13 +32,29 @@ Elasticsearch Views Exporter
 
 Allows to create indexes on Elasticsearch based on views.
 
+It supports one view per index and each index is created using a
+``SELECT * FROM ...`` on the selected view.
+
+The only synchronisation strategy available is one-shot with possible
+automatic refreshes. Meaning that at every refresh the index is dropped and
+regenerated completely.
+
 Usage
 =====
+
+Menu entries are:
+
+* Settings > Technical > Elasticsearch
+* Settings > Technical > Elasticsearch > Hosts: configuration of the
+  Elasticsearch hosts
+* Settings > Technical > Elasticsearch > View Indexes: configuration of
+  the indexes
 
  """,
  'website': 'http://www.camptocamp.com',
  'external_dependencies': {'python': ['elasticsearch']},
- 'data': ['views/elasticsearch_host_views.xml',
+ 'data': ['views/elasticsearch_menus.xml',
+          'views/elasticsearch_host_views.xml',
           'views/elasticsearch_view_index_views.xml',
           'data/elasticsearch_cron.xml',
           'security/ir.model.access.csv',
