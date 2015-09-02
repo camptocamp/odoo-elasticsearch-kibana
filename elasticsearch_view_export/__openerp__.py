@@ -24,7 +24,8 @@
  'author': 'Camptocamp',
  'license': 'AGPL-3',
  'category': 'Tools',
- 'depends': ['base'],
+ 'depends': ['mail',
+             ],
  'description': """
 ============================
 Elasticsearch Views Exporter

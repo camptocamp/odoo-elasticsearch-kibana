@@ -41,6 +41,7 @@ BULK_CHUNK_SIZE = 1000  # records at a time
 class ElasticsearchViewIndex(orm.Model):
     _name = 'elasticsearch.view.index'
     _description = 'Elasticsearch View Index'
+    _inherit = ['mail.thread']
 
     def _selection_sql_view(self, cr, uid, context=None):
         cr.execute(
@@ -126,8 +127,26 @@ class ElasticsearchViewIndex(orm.Model):
                       ('refresh_next', '<=', fields.datetime.now())]
             ids = self.search(cr, uid, domain, context=context)
         for view_index in self.browse(cr, uid, ids, context=context):
-            self._es_create_index(cr, uid, view_index, context=context)
-            values = {'state': 'done'}
+            values = {}
+            try:
+                self._es_refresh_index(cr, uid, view_index, context=context)
+            except Exception as err:
+                if not automatic:
+                    raise
+                # when it runs from a cron, we want to log any error
+                # that could happen so the user is aware that the
+                # indexing didn't work
+                _logger.exception('Error when indexing on Elasticsearch')
+                if isinstance(err, orm.except_orm):
+                    err = err[1]
+                msg = _('Indexing on Elasticsearch failed.\n\n%s') % (err,)
+                self.message_post(cr, uid, view_index.id, body=msg,
+                                  context=context)
+                # even if it failed, we want to continue and update the
+                # 'refresh_next' date so it will be retried next time
+            else:
+                values['state'] = 'done'
+
             if automatic:
                 next_date = datetime.strptime(view_index.refresh_next,
                                               DEFAULT_SERVER_DATETIME_FORMAT)
@@ -160,9 +179,16 @@ class ElasticsearchViewIndex(orm.Model):
         if es.indices.exists(index=view_index.name):
             es.indices.delete(index=view_index.name)
 
-    def _es_create_index(self, cr, uid, view_index, context=None):
+    def _es_refresh_index(self, cr, uid, view_index, context=None):
         es = self._es_client(cr, uid, view_index, context=context)
-        self._es_drop_index(cr, uid, view_index, es, context=context)
+        try:
+            self._es_drop_index(cr, uid, view_index, es, context=context)
+        except TransportError as err:
+            raise orm.except_orm(
+                _('Error'),
+                _('Could not create the '
+                  'index on Elasticsearch:\n\n%s' % (err,))
+            )
         _logger.info("Creating index '%s' on %s", view_index.name, es)
 
         request_body = {
