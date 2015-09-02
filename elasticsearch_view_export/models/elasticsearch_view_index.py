@@ -45,11 +45,23 @@ class ElasticsearchViewIndex(orm.Model):
 
     def _selection_sql_view(self, cr, uid, context=None):
         cr.execute(
-            "SELECT viewname FROM pg_catalog.pg_views "
-            "WHERE schemaname NOT IN ('pg_catalog', 'information_schema') "
-            "ORDER BY schemaname, viewname"
+            "SELECT c.relname AS viewname, "
+            "       obj_description(c.oid) "
+            "   FROM pg_class c "
+            "     LEFT JOIN pg_namespace n ON n.oid = c.relnamespace "
+            "WHERE c.relkind IN ('v', 'm') "
+            "AND n.nspname NOT IN ('pg_catalog', 'information_schema')"
         )
-        return [(row[0], row[0]) for row in cr.fetchall()]
+        selection = []
+        for row in cr.fetchall():
+            view_name = row[0]
+            comment = row[1]
+            if comment:
+                descr = "%s <%s>" % (view_name, comment)
+            else:
+                descr = view_name
+            selection.append((view_name, descr))
+        return selection
 
     _columns = {
         'name': fields.char(string='Index Name', required=True),
