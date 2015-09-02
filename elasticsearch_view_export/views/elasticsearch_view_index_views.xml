@@ -29,20 +29,42 @@
           </header>
           <sheet string="ElasticSearch View Index">
             <group>
-              <field name="name" attrs="{'readonly': [('state', '!=', 'draft')]}"/>
-              <field name="sql_view" attrs="{'readonly': [('state', '!=', 'draft')]}"/>
-              <field name="host_id" attrs="{'readonly': [('state', '!=', 'draft')]}"/>
+              <group>
+                <field name="name" attrs="{'readonly': [('state', '!=', 'draft')]}"/>
+                <field name="sql_view" attrs="{'readonly': [('state', '!=', 'draft')]}"/>
+                <field name="host_id" attrs="{'readonly': [('state', '!=', 'draft')]}"/>
+              </group>
+              <group class="oe_grey" col="1">
+                <p attrs="{'invisible': [('state', '!=', 'draft')]}">
+                  Click on the 'Create Index' button to create the
+                  index on Elasticsearch.
+                </p>
+                <p attrs="{'invisible': [('state', '=', 'draft')]}">
+                  The index exists on Elasticsearch.
+                  If you delete this record, the index will not be deleted
+                  on Elasticsearch, so be sure to use the 'Drop Index' button
+                  before.
+                </p>
+              </group>
             </group>
             <group string="Refresh">
-              <field name="refresh_auto"/>
-              <group attrs="{'invisible': [('refresh_auto', '=', False)]}"
-                colspan="2">
-                <label for="refresh_interval"/>
-                <div>
+              <group>
+                <field name="refresh_auto"/>
+                <group attrs="{'invisible': [('refresh_auto', '=', False)]}"
+                  colspan="2">
+                  <label for="refresh_interval"/>
+                  <div>
                     <field name="refresh_interval" class="oe_inline" />
                     <field name="refresh_interval_type" class="oe_inline" />
-                </div>
-                <field name="refresh_next"/>
+                  </div>
+                  <field name="refresh_next"/>
+                </group>
+              </group>
+              <group class="oe_grey" col="1">
+                <p attrs="{'invisible': [('refresh_auto', '=', False)]}">
+                  At every refresh, the index will be dropped and created
+                  afresh from the selected view.
+                </p>
               </group>
             </group>
             <group string="Index configuration">
