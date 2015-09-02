@@ -22,9 +22,9 @@
 from openerp.osv import orm, fields
 
 
-class ElasticSearchHost(orm.Model):
+class ElasticsearchHost(orm.Model):
     _name = 'elasticsearch.host'
-    _description = 'ElasticSearch Host'
+    _description = 'Elasticsearch Host'
 
     _rec_name = 'host'
 

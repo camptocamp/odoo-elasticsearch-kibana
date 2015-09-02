@@ -19,7 +19,7 @@
 #
 #
 
-{'name': 'ElasticSearch Views Exporter',
+{'name': 'Elasticsearch Views Exporter',
  'version': '1.0',
  'author': 'Camptocamp',
  'license': 'AGPL-3',
@@ -27,10 +27,10 @@
  'depends': ['base'],
  'description': """
 ============================
-ElasticSearch Views Exporter
+Elasticsearch Views Exporter
 ============================
 
-Allows to create indexes on ElasticSearch based on views.
+Allows to create indexes on Elasticsearch based on views.
 
 Usage
 =====

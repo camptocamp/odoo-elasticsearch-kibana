@@ -38,9 +38,9 @@ _logger = logging.getLogger(__name__)
 BULK_CHUNK_SIZE = 1000  # records at a time
 
 
-class ElasticSearchViewIndex(orm.Model):
+class ElasticsearchViewIndex(orm.Model):
     _name = 'elasticsearch.view.index'
-    _description = 'ElasticSearch View Index'
+    _description = 'Elasticsearch View Index'
 
     def _selection_sql_view(self, cr, uid, context=None):
         cr.execute(
@@ -178,7 +178,7 @@ class ElasticSearchViewIndex(orm.Model):
             raise orm.except_orm(
                 _('Error'),
                 _('Could not create the '
-                  'index on ElasticSearch:\n\n%s' % (err,))
+                  'index on Elasticsearch:\n\n%s' % (err,))
             )
         index_data = self._es_index_data(cr, uid, view_index, context=context)
         try:
@@ -187,12 +187,12 @@ class ElasticSearchViewIndex(orm.Model):
             raise orm.except_orm(
                 _('Error'),
                 _('Could not send data on the '
-                  'index on ElasticSearch:\n\n%s' % (err,))
+                  'index on Elasticsearch:\n\n%s' % (err,))
             )
         except BulkIndexError as err:
             raise orm.except_orm(
                 _('Error'),
                 _('Could not index the view %s '
-                  'on ElasticSearch:\n\n%s' % (view_index.name, err,))
+                  'on Elasticsearch:\n\n%s' % (view_index.name, err,))
             )
         return result

@@ -6,7 +6,7 @@
       <field name="name">elasticsearch.view.index.form</field>
       <field name="model">elasticsearch.view.index</field>
       <field name="arch" type="xml">
-        <form string="ElasticSearch View Index" version="7.0">
+        <form string="Elasticsearch View Index" version="7.0">
           <header>
             <button name="refresh_index"
               type="object"
@@ -27,7 +27,7 @@
               nolabel="1"
               statusbar_visible="draft,done"/>
           </header>
-          <sheet string="ElasticSearch View Index">
+          <sheet string="Elasticsearch View Index">
             <group>
               <group>
                 <field name="name" attrs="{'readonly': [('state', '!=', 'draft')]}"/>
@@ -80,7 +80,7 @@
       <field name="name">elasticsearch.view.index.tree</field>
       <field name="model">elasticsearch.view.index</field>
       <field name="arch" type="xml">
-        <tree string="ElasticSearch View Indexes">
+        <tree string="Elasticsearch View Indexes">
           <field name="name"/>
           <field name="sql_view"/>
           <field name="host_id"/>
@@ -96,7 +96,7 @@
       <field name="name">elasticsearch.view.index.filter</field>
       <field name="model">elasticsearch.view.index</field>
       <field name="arch" type="xml">
-        <search string="ElasticSearch View Indexes">
+        <search string="Elasticsearch View Indexes">
           <field name="name"/>
           <field name="sql_view"/>
           <field name="host_id"/>
@@ -105,7 +105,7 @@
     </record>
 
     <record id="action_elasticsearch_view_index" model="ir.actions.act_window">
-      <field name="name">ElasticSearch View Indexes</field>
+      <field name="name">Elasticsearch View Indexes</field>
       <field name="type">ir.actions.act_window</field>
       <field name="res_model">elasticsearch.view.index</field>
       <field name="view_type">form</field>
@@ -117,7 +117,7 @@
       action="action_elasticsearch_view_index"
       sequence="20"
       parent="base.next_id_9"
-      string="ElasticSearch View Indexes"/>
+      string="Elasticsearch View Indexes"/>
 
   </data>
 </openerp>
