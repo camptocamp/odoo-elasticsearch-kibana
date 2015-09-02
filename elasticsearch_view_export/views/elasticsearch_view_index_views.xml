@@ -16,16 +16,20 @@
           <sheet string="ElasticSearch View Index">
             <group>
               <field name="name"/>
-              <field name="host_id"/>
               <field name="sql_view"/>
+              <field name="host_id"/>
             </group>
             <group string="Refresh">
-              <label for="refresh_interval"/>
-              <div>
-                  <field name="refresh_interval" class="oe_inline" />
-                  <field name="refresh_interval_type" class="oe_inline" />
-              </div>
-              <field name="refresh_next"/>
+              <field name="refresh_auto"/>
+              <group attrs="{'invisible': [('refresh_auto', '=', False)]}"
+                colspan="2">
+                <label for="refresh_interval"/>
+                <div>
+                    <field name="refresh_interval" class="oe_inline" />
+                    <field name="refresh_interval_type" class="oe_inline" />
+                </div>
+                <field name="refresh_next"/>
+              </group>
             </group>
             <group string="Index configuration">
               <field name="number_of_shards"/>
@@ -42,6 +46,12 @@
       <field name="arch" type="xml">
         <tree string="ElasticSearch View Indexes">
           <field name="name"/>
+          <field name="sql_view"/>
+          <field name="host_id"/>
+          <field name="refresh_auto"/>
+          <field name="refresh_interval"/>
+          <field name="refresh_interval_type"/>
+          <field name="refresh_next"/>
         </tree>
       </field>
     </record>
@@ -52,6 +62,8 @@
       <field name="arch" type="xml">
         <search string="ElasticSearch View Indexes">
           <field name="name"/>
+          <field name="sql_view"/>
+          <field name="host_id"/>
         </search>
       </field>
     </record>

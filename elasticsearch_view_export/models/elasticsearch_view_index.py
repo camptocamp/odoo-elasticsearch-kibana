@@ -58,6 +58,7 @@ class ElasticSearchViewIndex(orm.Model):
         'sql_view': fields.selection(_selection_sql_view,
                                      string='View',
                                      required=True),
+        'refresh_auto': fields.boolean('Automatic Refresh'),
         'refresh_interval_type': fields.selection(
             [('hourly', 'Hour(s)'),
              ('daily', 'Day(s)'),
@@ -89,6 +90,7 @@ class ElasticSearchViewIndex(orm.Model):
         return tomorrow.strftime("%Y-%m-%d 00:00:00")
 
     _defaults = {
+        'refresh_auto': True,
         'refresh_interval': 1,
         'refresh_next': _default_refresh_next,
         'refresh_interval_type': 'daily',
@@ -105,7 +107,8 @@ class ElasticSearchViewIndex(orm.Model):
 
     def _refresh_index(self, cr, uid, ids, automatic=False, context=None):
         if not ids:
-            domain = [('refresh_next', '<=', fields.datetime.now())]
+            domain = [('refresh_auto', '=', True),
+                      ('refresh_next', '<=', fields.datetime.now())]
             ids = self.search(cr, uid, domain, context=context)
         for view_index in self.browse(cr, uid, ids, context=context):
             self._es_create_index(cr, uid, view_index, context=context)
