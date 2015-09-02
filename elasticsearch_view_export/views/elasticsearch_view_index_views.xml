@@ -19,13 +19,17 @@
               <field name="host_id"/>
               <field name="sql_view"/>
             </group>
-            <group>
+            <group string="Refresh">
               <label for="refresh_interval"/>
               <div>
                   <field name="refresh_interval" class="oe_inline" />
                   <field name="refresh_interval_type" class="oe_inline" />
               </div>
               <field name="refresh_next"/>
+            </group>
+            <group string="Index configuration">
+              <field name="number_of_shards"/>
+              <field name="number_of_replicas"/>
             </group>
           </sheet>
         </form>

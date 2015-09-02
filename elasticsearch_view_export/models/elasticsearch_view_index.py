@@ -75,6 +75,8 @@ class ElasticSearchViewIndex(orm.Model):
         ),
         'refresh_next': fields.datetime('Date of next refresh',
                                         required=True),
+        'number_of_shards': fields.integer(string='Number of shards'),
+        'number_of_replicas': fields.integer(string='Number of replicas'),
     }
 
     def _default_refresh_next(self, cr, uid, context=None):
@@ -89,7 +91,9 @@ class ElasticSearchViewIndex(orm.Model):
     _defaults = {
         'refresh_interval': 1,
         'refresh_next': _default_refresh_next,
-        'refresh_interval_type': 'daily'
+        'refresh_interval_type': 'daily',
+        'number_of_shards': 1,
+        'number_of_replicas': 0,
     }
 
     def refresh_index(self, cr, uid, ids, context=None):
@@ -138,11 +142,10 @@ class ElasticSearchViewIndex(orm.Model):
         if es.indices.exists(index=view_index.name):
             es.indices.delete(index=view_index.name)
 
-        # TODO: param
         request_body = {
             'settings': {
-                'number_of_shards': 1,
-                'number_of_replicas': 0,
+                'number_of_shards': view_index.number_of_shards,
+                'number_of_replicas': view_index.number_of_replicas,
             }
         }
         try:
