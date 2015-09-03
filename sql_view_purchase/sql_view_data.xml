@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+  <data noupdate="1">
+    <record model="sql.view" id="sql_view_purchase_order_report">
+      <field name="name">Purchase Orders</field>
+      <field name="sql_name">purchase_order_report</field>
+      <field name="definition"><![CDATA[
+SELECT min(l.id) AS id,
+       s.id as purchase_id,
+       s.date_order AS date,
+       to_char(s.date_order::timestamp with time zone, 'YYYY'::text) AS name,
+       to_char(s.date_order::timestamp with time zone, 'MM'::text) AS month,
+       to_char(s.date_order::timestamp with time zone, 'YYYY-MM-DD'::text) AS day,
+       s.state,
+       s.date_approve,
+       s.minimum_planned_date AS expected_date,
+       pricelist.name AS pricelist_name,
+       validator_user.name AS validator_user_name,
+       warehouse.name AS warehouse_name,
+       supplier.name AS partner_name,
+       create_user.name AS user_name,
+       company.name AS company_name,
+       product.default_code AS product_code,
+       template.name AS product_name,
+       categ.name AS product_category_name,
+       template.uom_id AS product_uom_id,
+       u2.name AS product_uom_name,
+       location.name AS location_name,
+       sum(l.product_qty / u.factor * u2.factor) AS quantity,
+       date_part('epoch'::text, age(s.date_approve::timestamp with time zone, s.date_order::timestamp with time zone)) / (24 * 60 * 60)::numeric(16,2)::double precision AS delay,
+       date_part('epoch'::text, age(l.date_planned::timestamp with time zone, s.date_order::timestamp with time zone)) / (24 * 60 * 60)::numeric(16,2)::double precision AS delay_pass,
+       count(*) AS nbr,
+       sum(l.price_unit * l.product_qty)::numeric(16,2) AS price_total,
+       avg(100.0 * (l.price_unit * l.product_qty) / NULLIF(template.standard_price * l.product_qty / u.factor * u2.factor, 0.0))::numeric(16,2) AS negociation,
+       sum(template.standard_price * l.product_qty / u.factor * u2.factor)::numeric(16,2) AS price_standard,
+       (sum(l.product_qty * l.price_unit) / NULLIF(sum(l.product_qty / u.factor * u2.factor), 0.0))::numeric(16,2) AS price_average
+FROM purchase_order_line l
+JOIN purchase_order s ON s.id = l.order_id
+JOIN res_partner supplier ON supplier.id = s.partner_id
+JOIN res_company company ON company.id = s.company_id
+JOIN product_pricelist pricelist ON pricelist.id = s.pricelist_id
+LEFT JOIN stock_warehouse warehouse ON warehouse.id = s.warehouse_id
+LEFT JOIN stock_location location ON location.id = s.location_id
+LEFT JOIN product_product product ON product.id = l.product_id
+LEFT JOIN product_template template ON template.id = product.product_tmpl_id
+LEFT JOIN product_category categ ON categ.id = template.categ_id
+LEFT JOIN product_uom u ON u.id = l.product_uom
+LEFT JOIN product_uom u2 ON u2.id = template.uom_id
+LEFT JOIN res_users validator_user ON validator_user.id = s.validator
+LEFT JOIN res_users create_user ON create_user.id = s.create_uid
+GROUP BY s.id,
+         company.name,
+         create_user.name,
+         supplier.name,
+         u.factor,
+         location.name,
+         l.price_unit,
+         s.date_approve,
+         l.date_planned,
+         l.product_uom,
+         s.minimum_planned_date,
+         pricelist.name,
+         validator_user.name,
+         product.default_code,
+         template.name,
+         categ.name,
+         s.date_order,
+         to_char(s.date_order::timestamp with time zone, 'YYYY'::text),
+         to_char(s.date_order::timestamp with time zone, 'MM'::text),
+         to_char(s.date_order::timestamp with time zone, 'YYYY-MM-DD'::text),
+         s.state,
+         warehouse.name,
+         u.uom_type,
+         u.category_id,
+         template.uom_id,
+         u.id,
+         u2.name,
+         u2.factor
+       ]]></field>
+   </record>
+
+ </data>
+</openerp>
