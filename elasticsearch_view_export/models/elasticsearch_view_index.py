@@ -19,6 +19,7 @@
 #
 #
 
+import json
 import logging
 
 from datetime import datetime, timedelta
@@ -88,8 +89,7 @@ class ElasticsearchViewIndex(orm.Model):
         ),
         'refresh_next': fields.datetime('Date of next refresh',
                                         required=True),
-        'number_of_shards': fields.integer(string='Number of shards'),
-        'number_of_replicas': fields.integer(string='Number of replicas'),
+        'index_config': fields.text('Index Configuration'),
         'state': fields.selection(
             [('draft', 'Draft'),
              ('done', 'Indexed'),
@@ -113,10 +113,25 @@ class ElasticsearchViewIndex(orm.Model):
         'refresh_interval': 1,
         'refresh_next': _default_refresh_next,
         'refresh_interval_type': 'daily',
-        'number_of_shards': 1,
-        'number_of_replicas': 0,
         'state': 'draft',
+        'index_config': '{}',
     }
+
+    def _check_index_config(self, cr, uid, ids, context=None):
+        for record in self.browse(cr, uid, ids, context=context):
+            if not record.index_config:
+                continue
+            try:
+                json.dumps(record.index_config)
+            except ValueError:
+                return False
+        return True
+
+    _constraints = [
+        (_check_index_config,
+         'The index configuration must be a valid JSON.',
+         ['index_config']),
+    ]
 
     def refresh_index(self, cr, uid, ids, context=None):
         return self._refresh_index(cr, uid, ids, context=context)
@@ -206,15 +221,9 @@ class ElasticsearchViewIndex(orm.Model):
             )
         _logger.info("Creating index '%s' on %s", view_index.name, es)
 
-        request_body = {
-            'settings': {
-                'number_of_shards': view_index.number_of_shards,
-                'number_of_replicas': view_index.number_of_replicas,
-            }
-        }
         try:
             es.indices.create(index=view_index.name,
-                              body=request_body)
+                              body=view_index.index_config)
         except TransportError as err:
             raise orm.except_orm(
                 _('Error'),

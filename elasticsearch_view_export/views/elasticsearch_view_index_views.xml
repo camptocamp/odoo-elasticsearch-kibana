@@ -67,9 +67,8 @@
                 </p>
               </group>
             </group>
-            <group string="Index configuration">
-              <field name="number_of_shards"/>
-              <field name="number_of_replicas"/>
+            <group string="Index Configuration">
+              <field nolabel="1" name="index_config"/>
             </group>
           </sheet>
           <div class="oe_chatter">
