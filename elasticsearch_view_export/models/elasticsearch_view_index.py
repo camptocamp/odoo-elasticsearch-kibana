@@ -24,7 +24,6 @@ import logging
 from datetime import datetime, timedelta
 
 from dateutil.relativedelta import relativedelta
-from elasticsearch import Elasticsearch
 from elasticsearch.helpers import bulk, BulkIndexError
 from elasticsearch.exceptions import TransportError
 
@@ -124,7 +123,7 @@ class ElasticsearchViewIndex(orm.Model):
 
     def drop_index(self, cr, uid, ids, context=None):
         for view_index in self.browse(cr, uid, ids, context=context):
-            es = self._es_client(cr, uid, view_index, context=context)
+            es = view_index.host_id._es_client()
             _logger.info("Dropping index '%s' on %s", view_index.name, es)
             self._es_drop_index(cr, uid, view_index, es, context=context)
             view_index.write({'state': 'draft'})
@@ -191,15 +190,12 @@ class ElasticsearchViewIndex(orm.Model):
                        '_type': 'document',
                        '_source': dict(zip(columns, row))}
 
-    def _es_client(self, cr, uid, view_index, context=None):
-        return Elasticsearch([view_index.host_id.host])
-
     def _es_drop_index(self, cr, uid, view_index, es, context=None):
         if es.indices.exists(index=view_index.name):
             es.indices.delete(index=view_index.name)
 
     def _es_refresh_index(self, cr, uid, view_index, context=None):
-        es = self._es_client(cr, uid, view_index, context=context)
+        es = view_index.host_id._es_client()
         try:
             self._es_drop_index(cr, uid, view_index, es, context=context)
         except TransportError as err:

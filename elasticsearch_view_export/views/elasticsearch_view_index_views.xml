@@ -119,7 +119,7 @@
 
     <menuitem id="menu_elasticsearch_view_index"
       action="action_elasticsearch_view_index"
-      sequence="21"
+      sequence="30"
       parent="menu_elasticsearch"
       name="View Indexes"/>
 

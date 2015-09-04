@@ -48,6 +48,8 @@ Menu entries are:
 * Settings > Technical > Elasticsearch
 * Settings > Technical > Elasticsearch > Hosts: configuration of the
   Elasticsearch hosts
+* Settings > Technical > Elasticsearch > Index Templates: configure
+  Elasticsearch Index Templates
 * Settings > Technical > Elasticsearch > View Indexes: configuration of
   the indexes
 
@@ -56,6 +58,7 @@ Menu entries are:
  'external_dependencies': {'python': ['elasticsearch']},
  'data': ['views/elasticsearch_menus.xml',
           'views/elasticsearch_host_views.xml',
+          'views/elasticsearch_index_template_views.xml',
           'views/elasticsearch_view_index_views.xml',
           'data/elasticsearch_cron.xml',
           'security/ir.model.access.csv',

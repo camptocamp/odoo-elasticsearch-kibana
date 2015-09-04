@@ -19,6 +19,8 @@
 #
 #
 
+from elasticsearch import Elasticsearch
+
 from openerp.osv import orm, fields
 
 
@@ -31,3 +33,10 @@ class ElasticsearchHost(orm.Model):
     _columns = {
         'host': fields.char(string='Host', required=True),
     }
+
+    def _es_client(self, cr, uid, ids, context=None):
+        if isinstance(ids, (list, tuple)):
+            assert len(ids) == 1, "1 ID expected"
+            ids = ids[0]
+        host = self.browse(cr, uid, ids, context=context)
+        return Elasticsearch([host.host])
