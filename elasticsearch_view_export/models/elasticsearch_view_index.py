@@ -35,7 +35,7 @@ from openerp.tools.translate import _
 
 _logger = logging.getLogger(__name__)
 
-BULK_CHUNK_SIZE = 1000  # records at a time
+BULK_CHUNK_SIZE = 500  # records at a time
 
 
 class ElasticsearchViewIndex(orm.Model):
@@ -179,10 +179,15 @@ class ElasticsearchViewIndex(orm.Model):
 
     def _es_index_data(self, cr, uid, view_index, context=None):
         cr.execute("SELECT * FROM %s" % view_index.sql_view)
-        for row in cr.dictfetchall():
-            yield {'_index': view_index.name,
-                   '_type': 'document',
-                   '_source': row}
+        columns = [desc[0] for desc in cr.description]
+        while 1:
+            rows = cr.fetchmany(BULK_CHUNK_SIZE)
+            if not rows:
+                break
+            for row in rows:
+                yield {'_index': view_index.name,
+                       '_type': 'document',
+                       '_source': dict(zip(columns, row))}
 
     def _es_client(self, cr, uid, view_index, context=None):
         return Elasticsearch([view_index.host_id.host])
