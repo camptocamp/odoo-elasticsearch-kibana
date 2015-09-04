@@ -203,7 +203,7 @@ class ElasticsearchViewIndex(orm.Model):
         except TransportError as err:
             raise orm.except_orm(
                 _('Error'),
-                _('Could not create the '
+                _('Could not delete the '
                   'index on Elasticsearch:\n\n%s' % (err,))
             )
         _logger.info("Creating index '%s' on %s", view_index.name, es)
