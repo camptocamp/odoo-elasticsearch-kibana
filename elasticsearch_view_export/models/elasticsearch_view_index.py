@@ -175,6 +175,8 @@ class ElasticsearchViewIndex(orm.Model):
                     new_date = next_date + relativedelta(years=+interval)
                 values['refresh_next'] = new_date
             view_index.write(values)
+            if automatic:
+                cr.commit()
         return True
 
     def _es_index_data(self, cr, uid, view_index, context=None):
