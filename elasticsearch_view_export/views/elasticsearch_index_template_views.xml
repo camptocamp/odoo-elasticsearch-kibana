@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+  <data noupdate="0">
+
+    <record id="view_elasticsearch_index_template_form" model="ir.ui.view">
+      <field name="name">elasticsearch.index.template.form</field>
+      <field name="model">elasticsearch.index.template</field>
+      <field name="arch" type="xml">
+        <form string="Elasticsearch Index Template" version="7.0">
+          <header>
+            <button name="refresh_template"
+              type="object"
+              string="Create Template"
+              states="draft"
+              class="oe_highlight"/>
+            <button name="refresh_template"
+              type="object"
+              states="done"
+              string="Update Template"
+              class="oe_highlight"/>
+            <button name="drop_template"
+              type="object"
+              states="done"
+              string="Drop Template"/>
+            <field name="state"
+              widget="statusbar"
+              nolabel="1"
+              statusbar_visible="draft,done"/>
+          </header>
+          <sheet string="Elasticsearch Index Template">
+            <group>
+              <group>
+                <field name="name" attrs="{'readonly': [('state', '!=', 'draft')]}"/>
+                <field name="host_id" attrs="{'readonly': [('state', '!=', 'draft')]}"/>
+              </group>
+            </group>
+            <group string="Index Template">
+                <field name="template" nolabel="1"/>
+            </group>
+          </sheet>
+        </form>
+      </field>
+    </record>
+
+    <record id="view_elasticsearch_index_template_tree" model="ir.ui.view">
+      <field name="name">elasticsearch.index.template.tree</field>
+      <field name="model">elasticsearch.index.template</field>
+      <field name="arch" type="xml">
+        <tree string="Elasticsearch Index Templates">
+          <field name="name"/>
+          <field name="host_id"/>
+        </tree>
+      </field>
+    </record>
+
+    <record id="view_elasticsearch_index_template_search" model="ir.ui.view">
+      <field name="name">elasticsearch.index.template.filter</field>
+      <field name="model">elasticsearch.index.template</field>
+      <field name="arch" type="xml">
+        <search string="Elasticsearch Index Templates">
+          <field name="name"/>
+          <field name="host_id"/>
+        </search>
+      </field>
+    </record>
+
+    <record id="action_elasticsearch_index_template" model="ir.actions.act_window">
+      <field name="name">Elasticsearch Index Templates</field>
+      <field name="type">ir.actions.act_window</field>
+      <field name="res_model">elasticsearch.index.template</field>
+      <field name="view_type">form</field>
+      <field name="view_mode">tree,form</field>
+      <field name="search_view_id" ref="view_elasticsearch_index_template_search"/>
+    </record>
+
+    <menuitem id="menu_elasticsearch_index_template"
+      action="action_elasticsearch_index_template"
+      sequence="25"
+      parent="menu_elasticsearch"
+      name="Index Templates"/>
+
+  </data>
+</openerp>

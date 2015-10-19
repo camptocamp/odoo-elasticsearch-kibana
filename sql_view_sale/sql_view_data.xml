@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+  <data noupdate="1">
+    <record model="sql.view" id="sql_view_sale_order_report">
+      <field name="name">Sales Orders</field>
+      <field name="sql_name">sale_order_report</field>
+      <field name="definition"><![CDATA[
+SELECT
+  sale_order_line.id AS so_line_id,
+  sale_order_line.name AS so_line_name,
+  sale_order_line.price_unit AS so_line_price_unit,
+  sale_order_line.product_uom_qty AS so_line_product_uom_qty,
+  (sale_order_line.product_uom_qty * sale_order_line.price_unit) AS so_line_product_subtotal,
+  sale_order_line.product_uom AS product_uom_id,
+  uom.name AS product_uom_name,
+  sale_order_line.product_uos_qty AS quantity,
+  sale_order_line.product_uos AS product_uos_id,
+  uos.name AS product_uos_name,
+  sale_order_line.product_id AS product_id,
+  product_product.default_code AS product_code,
+  product_template.name AS product_name,
+  sale_order_line.state AS so_line_state,
+  sale_order_line.invoiced AS so_line_invoiced,
+  sale_order_line.discount AS so_line_discount,
+  sale_order_line.commercial_margin AS so_line_commercial_margin,
+  sale_order_line.markup_rate AS so_line_markup_rate,
+  sale_order_line.cost_price AS so_line_cost_price,
+  sale_order.id AS so_id,
+  sale_order.name AS so_name,
+  product_pricelist.id AS pricelist_id,
+  product_pricelist.name AS pricelist_name,
+  res_currency.name AS currency,
+  sale_order.state AS so_state,
+  sale_order.origin AS so_origin,
+  sale_order.date_order AS so_date_order,
+  sale_order.date_confirm AS so_date_confirm,
+  res_partner.id AS partner_id,
+  res_partner.name AS partner_name,
+  res_country.name as partner_country,
+  sale_order.user_id AS user_id,
+  res_users.name AS user_name,
+  sale_shop.name AS shop_name,
+  sale_order.project_id AS aa_id,
+  account_analytic_account.code AS aa_code,
+  account_analytic_account.name AS aa_name
+FROM sale_order
+  JOIN sale_order_line on (sale_order.id = sale_order_line.order_id)
+  LEFT JOIN product_product on (product_product.id = sale_order_line.product_id)
+  JOIN product_template on (product_template.id = product_product.product_tmpl_id)
+  JOIN product_pricelist on (product_pricelist.id = sale_order.pricelist_id)
+  JOIN res_currency on (res_currency.id = product_pricelist.currency_id)
+  JOIN res_partner on (res_partner.id = sale_order.partner_id)
+  JOIN sale_shop on (sale_shop.id = sale_order.shop_id)
+  LEFT JOIN res_country on (res_country.id = res_partner.country_id)
+  LEFT JOIN account_analytic_account on (account_analytic_account.id = sale_order.project_id)
+  LEFT JOIN res_users on (res_users.id = sale_order.user_id)
+  LEFT JOIN product_uom uom on (uom.id = sale_order_line.product_uom)
+  LEFT JOIN product_uom uos on (uos.id = sale_order_line.product_uos)
+       ]]></field>
+   </record>
+
+ </data>
+</openerp>

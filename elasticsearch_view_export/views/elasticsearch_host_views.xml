@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+  <data noupdate="0">
+
+    <record id="view_elasticsearch_host_form" model="ir.ui.view">
+      <field name="name">elasticsearch.host.form</field>
+      <field name="model">elasticsearch.host</field>
+      <field name="arch" type="xml">
+        <form string="Elasticsearch Host" version="7.0">
+          <sheet string="Elasticsearch Host">
+            <group>
+              <field name="host"/>
+            </group>
+          </sheet>
+        </form>
+      </field>
+    </record>
+
+    <record id="view_elasticsearch_host_tree" model="ir.ui.view">
+      <field name="name">elasticsearch.host.tree</field>
+      <field name="model">elasticsearch.host</field>
+      <field name="arch" type="xml">
+        <tree string="Elasticsearch Hosts">
+          <field name="host"/>
+        </tree>
+      </field>
+    </record>
+
+    <record id="view_elasticsearch_host_search" model="ir.ui.view">
+      <field name="name">elasticsearch.host.filter</field>
+      <field name="model">elasticsearch.host</field>
+      <field name="arch" type="xml">
+        <search string="Elasticsearch Hosts">
+          <field name="host"/>
+        </search>
+      </field>
+    </record>
+
+    <record id="action_elasticsearch_host" model="ir.actions.act_window">
+      <field name="name">Elasticsearch Hosts</field>
+      <field name="type">ir.actions.act_window</field>
+      <field name="res_model">elasticsearch.host</field>
+      <field name="view_type">form</field>
+      <field name="view_mode">tree,form</field>
+      <field name="search_view_id" ref="view_elasticsearch_host_search"/>
+    </record>
+
+    <menuitem id="menu_elasticsearch_host"
+      action="action_elasticsearch_host"
+      sequence="20"
+      parent="menu_elasticsearch"
+      name="Hosts"/>
+
+  </data>
+</openerp>

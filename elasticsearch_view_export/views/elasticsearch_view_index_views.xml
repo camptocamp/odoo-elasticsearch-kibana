@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+  <data noupdate="0">
+
+    <record id="view_elasticsearch_view_index_form" model="ir.ui.view">
+      <field name="name">elasticsearch.view.index.form</field>
+      <field name="model">elasticsearch.view.index</field>
+      <field name="arch" type="xml">
+        <form string="Elasticsearch View Index" version="7.0">
+          <header>
+            <button name="refresh_index"
+              type="object"
+              string="Create Index"
+              states="draft"
+              class="oe_highlight"/>
+            <button name="refresh_index"
+              type="object"
+              states="done"
+              string="Refresh Index"
+              class="oe_highlight"/>
+            <button name="drop_index"
+              type="object"
+              states="done"
+              string="Drop Index"/>
+            <field name="state"
+              widget="statusbar"
+              nolabel="1"
+              statusbar_visible="draft,done"/>
+          </header>
+          <sheet string="Elasticsearch View Index">
+            <group>
+              <group>
+                <field name="name" attrs="{'readonly': [('state', '!=', 'draft')]}"/>
+                <field name="sql_view" attrs="{'readonly': [('state', '!=', 'draft')]}"/>
+                <field name="host_id" attrs="{'readonly': [('state', '!=', 'draft')]}"/>
+              </group>
+              <group class="oe_grey" col="1">
+                <p attrs="{'invisible': [('state', '!=', 'draft')]}">
+                  Click on the 'Create Index' button to create the
+                  index on Elasticsearch.
+                </p>
+                <p attrs="{'invisible': [('state', '=', 'draft')]}">
+                  The index exists on Elasticsearch.
+                  If you delete this record, the index will not be deleted
+                  on Elasticsearch, so be sure to use the 'Drop Index' button
+                  before.
+                </p>
+              </group>
+            </group>
+            <group string="Refresh">
+              <group>
+                <field name="refresh_auto"/>
+                <group attrs="{'invisible': [('refresh_auto', '=', False)]}"
+                  colspan="2">
+                  <label for="refresh_interval"/>
+                  <div>
+                    <field name="refresh_interval" class="oe_inline" />
+                    <field name="refresh_interval_type" class="oe_inline" />
+                  </div>
+                  <field name="refresh_next"/>
+                </group>
+              </group>
+              <group class="oe_grey" col="1">
+                <p attrs="{'invisible': [('refresh_auto', '=', False)]}">
+                  At every refresh, the index will be dropped and created
+                  afresh from the selected view.
+                </p>
+              </group>
+            </group>
+            <group string="Index Configuration">
+              <field nolabel="1" name="index_config"/>
+            </group>
+          </sheet>
+          <div class="oe_chatter">
+            <field name="message_follower_ids" widget="mail_followers"/>
+            <field name="message_ids" widget="mail_thread"/>
+          </div>
+        </form>
+      </field>
+    </record>
+
+    <record id="view_elasticsearch_view_index_tree" model="ir.ui.view">
+      <field name="name">elasticsearch.view.index.tree</field>
+      <field name="model">elasticsearch.view.index</field>
+      <field name="arch" type="xml">
+        <tree string="Elasticsearch View Indexes">
+          <field name="name"/>
+          <field name="sql_view"/>
+          <field name="host_id"/>
+          <field name="refresh_auto"/>
+          <field name="refresh_interval"/>
+          <field name="refresh_interval_type"/>
+          <field name="refresh_next"/>
+        </tree>
+      </field>
+    </record>
+
+    <record id="view_elasticsearch_view_index_search" model="ir.ui.view">
+      <field name="name">elasticsearch.view.index.filter</field>
+      <field name="model">elasticsearch.view.index</field>
+      <field name="arch" type="xml">
+        <search string="Elasticsearch View Indexes">
+          <field name="name"/>
+          <field name="sql_view"/>
+          <field name="host_id"/>
+        </search>
+      </field>
+    </record>
+
+    <record id="action_elasticsearch_view_index" model="ir.actions.act_window">
+      <field name="name">Elasticsearch View Indexes</field>
+      <field name="type">ir.actions.act_window</field>
+      <field name="res_model">elasticsearch.view.index</field>
+      <field name="view_type">form</field>
+      <field name="view_mode">tree,form</field>
+      <field name="search_view_id" ref="view_elasticsearch_view_index_search"/>
+    </record>
+
+    <menuitem id="menu_elasticsearch_view_index"
+      action="action_elasticsearch_view_index"
+      sequence="30"
+      parent="menu_elasticsearch"
+      name="View Indexes"/>
+
+  </data>
+</openerp>

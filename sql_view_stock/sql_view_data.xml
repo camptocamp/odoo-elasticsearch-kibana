@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+  <data noupdate="1">
+    <record model="sql.view" id="sql_view_stock_move_in_out">
+      <field name="name">Stock Moves (in/out)</field>
+      <field name="sql_name">stock_move_in_out</field>
+      <field name="definition"><![CDATA[
+(
+SELECT
+  min(m.id) as id,
+  m.date as date,
+  to_char(m.date, 'YYYY') as year,
+  to_char(m.date, 'MM') as month,
+  m.partner_id as partner_id,
+  m.location_id as location_id,
+  m.product_id as product_id,
+  pt.categ_id as product_categ_id,
+  l.usage as location_type,
+  l.scrap_location as scrap_location,
+  m.company_id,
+  m.state as state,
+  m.prodlot_id as prodlot_id,
+  coalesce(sum(-pt.standard_price * m.product_qty * pu.factor / pu2.factor)::decimal, 0.0) as value,
+  coalesce(sum(-m.product_qty * pu.factor / pu2.factor)::decimal, 0.0) as product_qty,
+  0.0 AS product_qty_in,
+  coalesce(sum(m.product_qty * pu.factor / pu2.factor)::decimal, 0.0) AS product_qty_out
+FROM stock_move m
+LEFT JOIN stock_picking p ON m.picking_id = p.id
+LEFT JOIN product_product pp ON m.product_id = pp.id
+LEFT JOIN product_template pt ON pp.product_tmpl_id = pt.id
+LEFT JOIN product_uom pu ON pt.uom_id = pu.id
+LEFT JOIN product_uom pu2 ON m.product_uom = pu2.id
+LEFT JOIN product_uom u ON m.product_uom = u.id
+LEFT JOIN stock_location l ON m.location_id = l.id
+WHERE
+  m.state != 'cancel'
+GROUP BY
+  m.id,
+  m.product_id,
+  m.product_uom,
+  pt.categ_id,
+  m.partner_id,
+  m.location_id,
+  m.location_dest_id,
+  m.prodlot_id,
+  m.date,
+  m.state,
+  l.usage,
+  l.scrap_location,
+  m.company_id,
+  pt.uom_id,
+  to_char(m.date, 'YYYY'),
+  to_char(m.date, 'MM')
+) UNION ALL (
+SELECT
+  -m.id as id, m.date as date,
+  to_char(m.date, 'YYYY') as year,
+  to_char(m.date, 'MM') as month,
+  m.partner_id as partner_id,
+  m.location_dest_id as location_id,
+  m.product_id as product_id,
+  pt.categ_id as product_categ_id,
+  l.usage as location_type,
+  l.scrap_location as scrap_location,
+  m.company_id,
+  m.state as state,
+  m.prodlot_id as prodlot_id,
+  coalesce(sum(pt.standard_price * m.product_qty * pu.factor / pu2.factor)::decimal, 0.0) as value,
+  coalesce(sum(m.product_qty * pu.factor / pu2.factor)::decimal, 0.0) as product_qty,
+  coalesce(sum(m.product_qty * pu.factor / pu2.factor)::decimal, 0.0) as product_qty_in,
+  0.0 as product_qty_out
+FROM stock_move m
+LEFT JOIN stock_picking p ON m.picking_id = p.id
+LEFT JOIN product_product pp ON m.product_id = pp.id
+LEFT JOIN product_template pt ON pp.product_tmpl_id = pt.id
+LEFT JOIN product_uom pu ON pt.uom_id = pu.id
+LEFT JOIN product_uom pu2 ON m.product_uom = pu2.id
+LEFT JOIN product_uom u ON m.product_uom = u.id
+LEFT JOIN stock_location l ON m.location_dest_id = l.id
+WHERE
+  m.state != 'cancel'
+GROUP BY
+  m.id,
+  m.product_id,
+  m.product_uom,
+  pt.categ_id,
+  m.partner_id,
+  m.location_id,
+  m.location_dest_id,
+  m.prodlot_id,
+  m.date,
+  m.state,
+  l.usage,
+  l.scrap_location,
+  m.company_id,
+  pt.uom_id,
+  to_char(m.date, 'YYYY'),
+  to_char(m.date, 'MM')
+)
+       ]]></field>
+   </record>
+
+
+    <record model="sql.view" id="sql_view_stock_move_cumulative">
+      <field name="name">Stock Moves (cumulative)</field>
+      <field name="sql_name">stock_move_cumulative</field>
+      <field name="definition"><![CDATA[
+SELECT
+  DATE_TRUNC('MONTH', date) AS month,
+  location_id,
+  product_id,
+  company_id,
+  product_categ_id,
+  state,
+  SUM(product_qty_in) AS qty_in,
+  SUM(product_qty_out) AS qty_out,
+  SUM(product_qty_in) - SUM(product_qty_out) AS qty_diff,
+  (SUM(SUM(product_qty_in)) OVER w - SUM(SUM(product_qty_out)) OVER w) - SUM(product_qty_in) + SUM(product_qty_out) AS qty_cumul_start,
+  SUM(SUM(product_qty_in)) OVER w - SUM(SUM(product_qty_out)) OVER w AS qty_cumul_end,
+  SUM(value) AS value,
+  (SUM(SUM(value)) OVER w) - SUM(value) AS value_cumul_start,
+  SUM(SUM(value)) OVER w AS value_cumul_end
+FROM sql_view_stock_move_in_out
+GROUP BY
+  DATE_TRUNC('MONTH', date),
+  location_id,
+  product_id,
+  company_id,
+  product_categ_id,
+  state
+WINDOW w AS (
+  PARTITION BY
+    location_id,
+    product_id,
+    company_id,
+    product_categ_id,
+    state
+  ORDER BY DATE_TRUNC('MONTH', date)
+)
+ORDER BY DATE_TRUNC('MONTH', date)
+       ]]></field>
+   </record>
+
+    <record model="sql.view" id="sql_view_stock_move_turnover">
+      <field name="name">Stock Moves (turnover)</field>
+      <field name="sql_name">stock_move_turnover</field>
+      <field name="definition"><![CDATA[
+SELECT
+  m.month,
+  m.location_id,
+  location.name AS location_name,
+  m.product_id,
+  product.default_code AS product_code,
+  product_template.name AS product_name,
+  m.company_id,
+  company.name AS company_name,
+  m.product_categ_id,
+  product_category.name AS product_category_name,
+  m.qty_in,
+  m.qty_out,
+  m.qty_diff,
+  m.qty_cumul_start,
+  m.qty_cumul_end,
+  CASE m.qty_cumul_start + m.qty_cumul_end
+    WHEN 0 THEN 0.0
+    ELSE m.qty_out / ((m.qty_cumul_start + m.qty_cumul_end) / 2)
+  END AS qty_turnover,
+  m.value,
+  m.value_cumul_start,
+  m.value_cumul_end
+FROM sql_view_stock_move_cumulative m
+JOIN stock_location location ON location.id = m.location_id
+JOIN product_product product ON product.id = m.product_id
+JOIN product_template ON product_template.id = product.product_tmpl_id
+JOIN product_category ON product_category.id = m.product_categ_id
+JOIN res_company company ON company.id = m.company_id
+WHERE
+  m.state = 'done'
+ORDER BY month
+       ]]></field>
+   </record>
+
+ </data>
+</openerp>
