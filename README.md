@@ -8,6 +8,6 @@ Odoo addons related to Elasticsearch and Kibana.
 The addons here are in an early stage of development and specific to our use cases.
 Once they are mature enough, they should be proposed to the OCA (https://github.com/OCA)
 
-The principle is to build SQL views of the required row data in Odoo and push them into a given index in Elasticsearch. Then you can use the power of Kibana to explore the data and build dashboard. The response time is impressiv even with billion of records.
+The principle is to build SQL views of the required row data in Odoo and push them into a given index in Elasticsearch. Then you can use the power of Kibana to explore the data and build dashboard. You can also use the pattern "index-name-*" in order to use Kibana to merge data from different SQL views. The response time is impressive even with billion of records.
 
-We use alongside those module this one https://github.com/OCA/server-tools/tree/7.0/sql_view in order to be able to write SQL view directly from Odoo interface.
+We use alongside those modules this one https://github.com/OCA/server-tools/tree/7.0/sql_view in order to be able to write SQL views directly from Odoo GUI interface.
